@@ -1,0 +1,56 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: camera-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: camera_ai
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: camera-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: camera-mediamtx
+    restart: unless-stopped
+    ports:
+      - "8554:8554"   # RTSP
+      - "8555:8555/udp" # RTSP/UDP
+      - "8888:8888"   # HLS
+      - "8889:8889"   # WebRTC
+      - "9997:9997"   # REST API
+    environment:
+      - MTX_RTSPTRANSPORTS=tcp
+      - MTX_API=yes
+      - MTX_AUTHMETHOD=internal
+      - MTX_AUTHINTERNALUSERS_0_USER=any
+      - MTX_AUTHINTERNALUSERS_0_PASS=
+      - MTX_AUTHINTERNALUSERS_0_PERMISSIONS_0_ACTION=publish
+      - MTX_AUTHINTERNALUSERS_0_PERMISSIONS_1_ACTION=read
+      - MTX_AUTHINTERNALUSERS_0_PERMISSIONS_2_ACTION=playback
+      - MTX_AUTHINTERNALUSERS_0_PERMISSIONS_3_ACTION=api
+      - MTX_AUTHINTERNALUSERS_0_PERMISSIONS_4_ACTION=metrics
+      - MTX_AUTHINTERNALUSERS_0_PERMISSIONS_5_ACTION=pprof
+      - MTX_PATHDEFAULTS_SOURCEONDEMAND=no
+      - MTX_HLSALWAYSREMUX=yes
+      - MTX_HLSVARIANT=lowLatency
+      - MTX_HLSSEGMENTDURATION=1s
+      - MTX_HLSPARTDURATION=200ms
+      - MTX_HLSSEGMENTCOUNT=7
+      - MTX_LOGLEVEL=info
+
+volumes:
+  mysql_data:
+  redis_data:
