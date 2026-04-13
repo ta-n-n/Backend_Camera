@@ -35,6 +35,8 @@ public class User {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
+    @Column
+    private String displayName;
     // Mật khẩu (nullable cho trường hợp đăng nhập bằng Google/Facebook)
     @Column
     private String password;
